@@ -1,0 +1,178 @@
+NAME
+    Dist::Zilla::PluginBundle::MITHALDU - Dist::Zilla configuration the way
+    MITHALDU does it
+
+VERSION
+    version 1.120030
+
+SYNOPSIS
+       # in dist.ini
+       [@MITHALDU]
+
+DESCRIPTION
+    This module is forked off of Dist::Zilla::PluginBundle::DAGOLDEN and
+    modified to suit my own tastes. He did most of the work.
+
+    This is a Dist::Zilla PluginBundle. It is roughly equivalent to the
+    following dist.ini:
+
+       ; version provider
+       [AutoVersion]  ; build a version from the date
+ 
+       ; choose files to include
+       [GatherDir]         ; everything under top dir
+       exclude_filename = README.pod   ; skip this generated file
+       exclude_filename = META.json    ; skip this generated file
+ 
+       [PruneCruft]        ; default stuff to skip
+       [ManifestSkip]      ; if -f MANIFEST.SKIP, skip those, too
+ 
+       ; file modifications
+       [OurPkgVersion]     ; add $VERSION = ... to all files
+       [InsertCopyright    ; add copyright at "# COPYRIGHT"
+       [PodWeaver]         ; generate Pod
+       config_plugin = @MITHALDU ; my own plugin allows Pod::WikiDoc
+ 
+       ; generated files
+       [License]           ; boilerplate license
+       [ReadmeFromPod]     ; from Pod (runs after PodWeaver)
+       [ReadmeAnyFromPod]  ; create README.pod in repo directory
+       type = pod
+       filename = README.pod
+       location = root
+ 
+       ; t tests
+       [Test::Compile]     ; make sure .pm files all compile
+       fake_home = 1       ; fakes $ENV{HOME} just in case
+ 
+       ; xt tests
+       [Test::PodSpelling] ; xt/author/pod-spell.t
+       [Test::Perl::Critic]; xt/author/critic.t
+       [MetaTests]         ; xt/release/meta-yaml.t
+       [PodSyntaxTests]    ; xt/release/pod-syntax.t
+       [PodCoverageTests]  ; xt/release/pod-coverage.t
+       [Test::Portability] ; xt/release/portability.t (of file name)
+       [Test::Version]     ; xt/release/test-version.t
+ 
+       ; metadata
+       [AutoPrereqs]       ; find prereqs from code
+       [MinimumPerl]       ; determine minimum perl version
+       [GithubMeta]
+ 
+       [MetaNoIndex]       ; sets 'no_index' in META
+       directory = t
+       directory = xt
+       directory = examples
+       directory = corpus
+       package = DB        ; just in case
+ 
+       [Bugtracker]        ; defaults to RT
+ 
+       [MetaProvides::Package] ; add 'provides' to META files
+       meta_noindex = 1        ; respect prior no_index directives
+ 
+       [MetaYAML]          ; generate META.yml (v1.4)
+       [MetaJSON]          ; generate META.json (v2)
+ 
+       ; build system
+       [ExecDir]           ; include 'bin/*' as executables
+       [ShareDir]          ; include 'share/' for File::ShareDir
+       [MakeMaker]         ; create Makefile.PL
+ 
+       ; manifest (after all generated files)
+       [Manifest]          ; create MANIFEST
+ 
+       ; copy META.json back to repo dis
+       [CopyFilesFromBuild]
+       copy = META.json
+ 
+       ; before release
+       [Git::Check]        ; ensure all files checked in
+       allow_dirty = dist.ini
+       allow_dirty = Changes
+       allow_dirty = README.pod
+       allow_dirty = META.json
+ 
+       [CheckPrereqsIndexed]    ; ensure prereqs are on CPAN
+       [CheckChangesHasContent] ; ensure Changes has been updated
+       [CheckExtraTests]   ; ensure xt/ tests pass
+       [TestRelease]       ; ensure t/ tests pass
+       [ConfirmRelease]    ; prompt before uploading
+ 
+       ; releaser
+       [UploadToCPAN]      ; uploads to CPAN
+ 
+       ; after release
+       [NextRelease]
+ 
+       [Git::Commit] ; commit Changes (as released)
+       allow_dirty = dist.ini
+       allow_dirty = Changes
+       allow_dirty = README.pod
+       allow_dirty = META.json
+ 
+       [Git::Tag]          ; tag repo with custom tag
+       tag_format = release-%v
+ 
+       [Git::Push]         ; push repo to remote
+       push_to = origin
+
+USAGE
+    To use this PluginBundle, just add it to your dist.ini. You can provide
+    the following options:
+
+    *   "is_task" -- this indicates whether TaskWeaver or PodWeaver should
+        be used. Default is 0.
+
+    *   "auto_prereq" -- this indicates whether AutoPrereq should be used or
+        not. Default is 1.
+
+    *   "tag_format" -- given to "Git::Tag". Default is 'release-%v' to be
+        more robust than just the version number when parsing versions
+
+    *   "fake_release" -- swaps FakeRelease for UploadToCPAN. Mostly useful
+        for testing a dist.ini without risking a real release.
+
+    *   "weaver_config" -- specifies a Pod::Weaver bundle. Defaults to
+        @MITHALDU.
+
+    *   "stopwords" -- add stopword for Test::PodSpelling (can be repeated)
+
+    *   "no_critic" -- omit Test::Perl::Critic tests
+
+    *   "no_spellcheck" -- omit Test::PodSpelling tests
+
+SEE ALSO
+    *   Dist::Zilla
+
+    *   Dist::Zilla::Plugin::PodWeaver
+
+    *   Dist::Zilla::Plugin::TaskWeaver
+
+SUPPORT
+  Bugs / Feature Requests
+    Please report any bugs or feature requests through the issue tracker at
+    <http://rt.cpan.org/Public/Dist/Display.html?Name=Dist-Zilla-PluginBundl
+    e-MITHALDU>. You will be notified automatically of any progress on your
+    issue.
+
+  Source Code
+    This is open source software. The code repository is available for
+    public review and contribution under the terms of the license.
+
+    <https://github.com/wchristian/dist-zilla-pluginbundle-mithaldu>
+
+      git clone https://github.com/wchristian/dist-zilla-pluginbundle-mithaldu.git
+
+AUTHORS
+    *   David Golden <dagolden@cpan.org>
+
+    *   Christian Walde <mithaldu@cpan.org>
+
+COPYRIGHT AND LICENSE
+    This software is Copyright (c) 2012 by Christian Walde.
+
+    This is free software, licensed under:
+
+      The Apache License, Version 2.0, January 2004
+

@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 package Dist::Zilla::PluginBundle::MITHALDU;
-our $VERSION = '1.120030'; # VERSION
+our $VERSION = '1.120050'; # VERSION
 
 # Dependencies
 use autodie 2.00;
@@ -31,14 +31,16 @@ use Dist::Zilla::Plugin::Test::PodSpelling 2.001002 ();
 use Dist::Zilla::Plugin::Test::Perl::Critic ();
 use Dist::Zilla::Plugin::PodWeaver ();
 use Dist::Zilla::Plugin::Test::Portability ();
-use Dist::Zilla::Plugin::ReadmeAnyFromPod ();
+use Dist::Zilla::Plugin::ReadmeAnyFromPod 0.120051 ();
 use Dist::Zilla::Plugin::ReadmeFromPod ();
 use Dist::Zilla::Plugin::TaskWeaver 0.101620 ();
 use Dist::Zilla::Plugin::Test::Version ();
 
+use Dist::Zilla::PluginBundle::MITHALDU::Templates;
+
 with 'Dist::Zilla::Role::PluginBundle::Easy';
 
-sub mvp_multivalue_args { qw/stopwords/ }
+sub mvp_multivalue_args { qw/stopwords gitignore exclude_match/ }
 
 has stopwords => (
   is      => 'ro',
@@ -109,6 +111,40 @@ has git_remote => (
   },
 );
 
+has gitignore => (
+  is      => 'ro',
+  isa     => 'ArrayRef',
+  lazy    => 1,
+  default => sub {
+    exists $_[0]->payload->{gitignore} ? $_[0]->payload->{gitignore} : []
+  },
+);
+
+has exclude_match => (
+  is      => 'ro',
+  isa     => 'ArrayRef',
+  lazy    => 1,
+  default => sub {
+    exists $_[0]->payload->{exclude_match} ? $_[0]->payload->{exclude_match} : []
+  },
+);
+
+sub _template {
+  my ( $self, $template ) = @_;
+  return Dist::Zilla::PluginBundle::MITHALDU::Templates->data( $template );
+}
+
+sub _file_from_template {
+  my ( $self, $template, $extra_content ) = @_;
+  $extra_content ||= '';
+  return (
+    "Generate-$template" => {
+      filename    => $template,
+      is_template => 1,
+      content     => $self->_template( $template ) . $extra_content,
+    }
+  );
+}
 
 sub configure {
   my $self = shift;
@@ -122,8 +158,19 @@ sub configure {
     [ 'AutoVersion' ],
 
   # gather and prune
-    [ GatherDir => { exclude_filename => [qw/README.pod META.json/] }], # core
-    'PruneCruft',         # core
+    [ GenerateFile => $self->_file_from_template(
+      '.gitignore',
+      join( "\n", $self->gitignore->flatten )
+    ) ],
+    [ GenerateFile => $self->_file_from_template( 'README.PATCHING' ) ],
+    [ GenerateFile => $self->_file_from_template( 'perlcritic.rc' ) ],
+    [ GatherDir => {
+      exclude_filename => [
+        qw/README.PATCHING README.pod META.json perlcritic.rc/
+      ],
+      exclude_match => $self->exclude_match,
+    }], # core
+    [ 'PruneCruft' => { except => '\.gitignore' } ],         # core
     'ManifestSkip',       # core
 
   # file munging
@@ -177,7 +224,8 @@ sub configure {
 
   # copy files from build back to root for inclusion in VCS
   [ CopyFilesFromBuild => {
-      copy => 'META.json',
+      copy => [qw/META.json README.PATCHING perlcritic.rc/],
+      move => '.gitignore',
     }
   ],
 
@@ -228,7 +276,7 @@ __PACKAGE__->meta->make_immutable;
 #
 # This is free software, licensed under:
 #
-#   The Apache License, Version 2.0, January 2004
+#   DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE, Version 2, December 2004
 #
 
 
@@ -241,7 +289,7 @@ Dist::Zilla::PluginBundle::MITHALDU - Dist::Zilla configuration the way MITHALDU
 
 =head1 VERSION
 
-version 1.120030
+version 1.120050
 
 =head1 SYNOPSIS
 
@@ -260,11 +308,35 @@ following dist.ini:
    [AutoVersion]  ; build a version from the date
  
    ; choose files to include
+ 
+   [GenerateFile]
+   filename    = .gitignore
+   is_template = 1
+   content = /.build
+   content = /{{ $dist->name }}-*
+   ; and more, see Dist::Zilla::PluginBundle::MITHALDU::Templates
+ 
+   [GenerateFile]
+   filename    = README.PATCHING
+   is_template = 1
+   content = [TestingAndDebugging::RequireUseStrict]
+   content = equivalent_modules = strictures
+   ; and more, see Dist::Zilla::PluginBundle::MITHALDU::Templates
+ 
+   [GenerateFile]
+   filename    = perlcritic.rc
+   is_template = 1
+   content = README.PATCHING
+   ; and more, see Dist::Zilla::PluginBundle::MITHALDU::Templates
+ 
    [GatherDir]         ; everything under top dir
+   exclude_filename = perlcritic.rc   ; skip this generated file
+   exclude_filename = README.PATCHING ; skip this generated file
    exclude_filename = README.pod   ; skip this generated file
    exclude_filename = META.json    ; skip this generated file
  
    [PruneCruft]        ; default stuff to skip
+   except = .gitignore
    [ManifestSkip]      ; if -f MANIFEST.SKIP, skip those, too
  
    ; file modifications
@@ -325,6 +397,9 @@ following dist.ini:
    ; copy META.json back to repo dis
    [CopyFilesFromBuild]
    copy = META.json
+   move = .gitignore
+   copy = README.PATCHING
+   copy = perlcritic.rc
  
    ; before release
    [Git::Check]        ; ensure all files checked in
@@ -405,6 +480,14 @@ C<<< no_critic >>> -- omit Test::Perl::Critic tests
 
 C<<< no_spellcheck >>> -- omit Test::PodSpelling tests
 
+=item *
+
+C<<< gitignore >>> -- adds entries to be added to .gitignore (can be repeated)
+
+=item *
+
+C<<< exclude_match >>> -- regexes to exclude files from the dist (can be repeated)
+
 =back
 
 =head1 SEE ALSO
@@ -464,7 +547,7 @@ This software is Copyright (c) 2012 by Christian Walde.
 
 This is free software, licensed under:
 
-  The Apache License, Version 2.0, January 2004
+  DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE, Version 2, December 2004
 
 =cut
 

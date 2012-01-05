@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 package Pod::Weaver::PluginBundle::MITHALDU;
-our $VERSION = '1.120030'; # VERSION
+our $VERSION = '1.120050'; # VERSION
 
 use Pod::Weaver::Config::Assembler;
 
@@ -77,7 +77,7 @@ sub mvp_bundle_config {
 #
 # This is free software, licensed under:
 #
-#   The Apache License, Version 2.0, January 2004
+#   DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE, Version 2, December 2004
 #
 
 1;
@@ -92,7 +92,7 @@ Pod::Weaver::PluginBundle::MITHALDU - MITHALDU's default Pod::Weaver config
 
 =head1 VERSION
 
-version 1.120030
+version 1.120050
 
 =head1 DESCRIPTION
 
@@ -163,7 +163,7 @@ This software is Copyright (c) 2012 by Christian Walde.
 
 This is free software, licensed under:
 
-  The Apache License, Version 2.0, January 2004
+  DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE, Version 2, December 2004
 
 =cut
 

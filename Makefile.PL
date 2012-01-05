@@ -22,9 +22,10 @@ my %WriteMakefileArgs = (
   },
   "DISTNAME" => "Dist-Zilla-PluginBundle-MITHALDU",
   "EXE_FILES" => [],
-  "LICENSE" => "apache",
+  "LICENSE" => "unrestricted",
   "NAME" => "Dist::Zilla::PluginBundle::MITHALDU",
   "PREREQ_PM" => {
+    "Data::Section::Simple" => 0,
     "Dist::Zilla" => "4.3",
     "Dist::Zilla::Plugin::AutoVersion" => 0,
     "Dist::Zilla::Plugin::Bugtracker" => "1.102670",
@@ -39,7 +40,7 @@ my %WriteMakefileArgs = (
     "Dist::Zilla::Plugin::MinimumPerl" => 0,
     "Dist::Zilla::Plugin::OurPkgVersion" => "0.001008",
     "Dist::Zilla::Plugin::PodWeaver" => 0,
-    "Dist::Zilla::Plugin::ReadmeAnyFromPod" => 0,
+    "Dist::Zilla::Plugin::ReadmeAnyFromPod" => "0.120051",
     "Dist::Zilla::Plugin::ReadmeFromPod" => 0,
     "Dist::Zilla::Plugin::TaskWeaver" => "0.101620",
     "Dist::Zilla::Plugin::Test::Compile" => 0,
@@ -59,9 +60,10 @@ my %WriteMakefileArgs = (
     "autodie" => "2.00",
     "namespace::autoclean" => "0.09",
     "strict" => 0,
+    "strictures" => 0,
     "warnings" => 0
   },
-  "VERSION" => "1.120030",
+  "VERSION" => "1.120050",
   "test" => {
     "TESTS" => "t/*.t"
   }

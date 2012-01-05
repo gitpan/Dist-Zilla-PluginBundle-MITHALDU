@@ -1,6 +1,6 @@
 Revision history for Dist-Zilla-PluginBundle-MITHALDU
 
-1.120030  2012-01-03 16:50:15 Europe/Berlin
+1.120050  2012-01-05 15:12:06 Europe/Berlin
     - AutoVersion instead of Git::NextVersion
     - the release commit now includes all release changes, removing the
       bump commit

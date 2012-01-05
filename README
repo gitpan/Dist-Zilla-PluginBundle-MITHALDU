@@ -3,7 +3,7 @@ NAME
     MITHALDU does it
 
 VERSION
-    version 1.120030
+    version 1.120050
 
 SYNOPSIS
        # in dist.ini
@@ -20,11 +20,35 @@ DESCRIPTION
        [AutoVersion]  ; build a version from the date
  
        ; choose files to include
+ 
+       [GenerateFile]
+       filename    = .gitignore
+       is_template = 1
+       content = /.build
+       content = /{{ $dist->name }}-*
+       ; and more, see Dist::Zilla::PluginBundle::MITHALDU::Templates
+ 
+       [GenerateFile]
+       filename    = README.PATCHING
+       is_template = 1
+       content = [TestingAndDebugging::RequireUseStrict]
+       content = equivalent_modules = strictures
+       ; and more, see Dist::Zilla::PluginBundle::MITHALDU::Templates
+ 
+       [GenerateFile]
+       filename    = perlcritic.rc
+       is_template = 1
+       content = README.PATCHING
+       ; and more, see Dist::Zilla::PluginBundle::MITHALDU::Templates
+ 
        [GatherDir]         ; everything under top dir
+       exclude_filename = perlcritic.rc   ; skip this generated file
+       exclude_filename = README.PATCHING ; skip this generated file
        exclude_filename = README.pod   ; skip this generated file
        exclude_filename = META.json    ; skip this generated file
  
        [PruneCruft]        ; default stuff to skip
+       except = .gitignore
        [ManifestSkip]      ; if -f MANIFEST.SKIP, skip those, too
  
        ; file modifications
@@ -85,6 +109,9 @@ DESCRIPTION
        ; copy META.json back to repo dis
        [CopyFilesFromBuild]
        copy = META.json
+       move = .gitignore
+       copy = README.PATCHING
+       copy = perlcritic.rc
  
        ; before release
        [Git::Check]        ; ensure all files checked in
@@ -142,6 +169,12 @@ USAGE
 
     *   "no_spellcheck" -- omit Test::PodSpelling tests
 
+    *   "gitignore" -- adds entries to be added to .gitignore (can be
+        repeated)
+
+    *   "exclude_match" -- regexes to exclude files from the dist (can be
+        repeated)
+
 SEE ALSO
     *   Dist::Zilla
 
@@ -174,5 +207,5 @@ COPYRIGHT AND LICENSE
 
     This is free software, licensed under:
 
-      The Apache License, Version 2.0, January 2004
+      DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE, Version 2, December 2004
 

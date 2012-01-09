@@ -1,9 +1,14 @@
 Revision history for Dist-Zilla-PluginBundle-MITHALDU
 
-1.120050  2012-01-05 15:12:06 Europe/Berlin
-    - AutoVersion instead of Git::NextVersion
-    - the release commit now includes all release changes, removing the
-      bump commit
+0.120090  2012-01-09 16:03:24 Europe/Berlin
+
+    - .gitignore, README.PATCHING and perlcritic.rc are now generated during the
+      build phase
+    - added an option to exclude files by regex
+    - release process now bumps the version in the release commit
+    - AutoVersion instead of Git::NextVersion 
+    - minimize noise in development commits by restricting metadata updates to
+      version and github urls to release time
 
 0.023     2011-12-30 15:29:54 EST5EDT
 

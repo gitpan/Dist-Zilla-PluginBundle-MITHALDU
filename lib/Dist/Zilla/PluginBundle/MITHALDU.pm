@@ -1,13 +1,15 @@
 use strict;
 use warnings;
 package Dist::Zilla::PluginBundle::MITHALDU;
-our $VERSION = '1.120050'; # VERSION
+our $VERSION = '0.120090'; # VERSION
 
 # Dependencies
 use autodie 2.00;
 use Moose 0.99;
 use Moose::Autobox;
 use namespace::autoclean 0.09;
+use CPAN::Meta;
+use Try::Tiny;
 
 use Dist::Zilla 4.3; # authordeps
 
@@ -37,6 +39,7 @@ use Dist::Zilla::Plugin::TaskWeaver 0.101620 ();
 use Dist::Zilla::Plugin::Test::Version ();
 
 use Dist::Zilla::PluginBundle::MITHALDU::Templates;
+use Dist::Zilla::Util::FileGenerator;
 
 with 'Dist::Zilla::Role::PluginBundle::Easy';
 
@@ -111,6 +114,15 @@ has git_remote => (
   },
 );
 
+has major_version => (
+  is      => 'ro',
+  isa     => 'Int',
+  lazy    => 1,
+  default => sub {
+    exists $_[0]->payload->{major_version} ? $_[0]->payload->{major_version} : 1
+  },
+);
+
 has gitignore => (
   is      => 'ro',
   isa     => 'ArrayRef',
@@ -129,21 +141,22 @@ has exclude_match => (
   },
 );
 
-sub _template {
-  my ( $self, $template ) = @_;
-  return Dist::Zilla::PluginBundle::MITHALDU::Templates->data( $template );
-}
+sub old_meta {
+  my $meta = try {
+    CPAN::Meta->load_file("META.json");
+  }
+  catch {
+    warn "META.json could not be read, using fallback meta. Error:\n $_";
+    return { version => 0.1, resources => { homepage => 'http://homepage', repository => { web => "user/repo" } } };
+  };
 
-sub _file_from_template {
-  my ( $self, $template, $extra_content ) = @_;
-  $extra_content ||= '';
-  return (
-    "Generate-$template" => {
-      filename    => $template,
-      is_template => 1,
-      content     => $self->_template( $template ) . $extra_content,
-    }
-  );
+  my @github_url = split '/', $meta->{resources}{repository}{web};
+  my ( $old_repo, $old_user ) = ( pop @github_url, pop @github_url );
+  my $github = [ homepage => $meta->{resources}{homepage}, repo => $old_repo, user => $old_user ];
+
+  my $version = $meta->{version};
+
+  return ( $version, $github, $meta );
 }
 
 sub configure {
@@ -152,25 +165,32 @@ sub configure {
   my @push_to = ('origin');
   push @push_to, $self->git_remote if $self->git_remote ne 'origin';
 
-  $self->add_plugins (
+  my $gitignore_extra = join "\n", $self->gitignore->flatten;
+
+  my $gen = Dist::Zilla::Util::FileGenerator->new(
+    files => [
+      [ '.gitignore' => ( extra_content => $gitignore_extra, move => 1 ) ],
+      'README.PATCHING',
+      'perlcritic.rc',
+    ],
+    source => "Dist::Zilla::PluginBundle::MITHALDU::Templates",
+  );
+
+  my ( $old_version, $old_github ) = $self->old_meta;
+
+  my $version_provider = ['StaticVersion' => { version => $old_version } ];
+
+  my $is_release = grep /^release$/, @ARGV;
+  $version_provider = [ 'AutoVersion' => { major => $self->major_version } ] if $is_release;
+
+  my @plugins = (
 
   # version number
-    [ 'AutoVersion' ],
+    $version_provider,
 
   # gather and prune
-    [ GenerateFile => $self->_file_from_template(
-      '.gitignore',
-      join( "\n", $self->gitignore->flatten )
-    ) ],
-    [ GenerateFile => $self->_file_from_template( 'README.PATCHING' ) ],
-    [ GenerateFile => $self->_file_from_template( 'perlcritic.rc' ) ],
-    [ GatherDir => {
-      exclude_filename => [
-        qw/README.PATCHING README.pod META.json perlcritic.rc/
-      ],
-      exclude_match => $self->exclude_match,
-    }], # core
-    [ 'PruneCruft' => { except => '\.gitignore' } ],         # core
+    [ GatherDir => { exclude_filename => [qw/README.pod META.json/], exclude_match => $self->exclude_match }], # core
+    'PruneCruft',         # core
     'ManifestSkip',       # core
 
   # file munging
@@ -206,7 +226,7 @@ sub configure {
   # metadata
     'MinimumPerl',
     ( $self->auto_prereq ? 'AutoPrereqs' : () ),
-    [ GithubMeta => { remote => $self->git_remote } ],
+    [ GithubMeta => { remote => $self->git_remote, ( $is_release ? () : @{$old_github} ) } ],
     [ MetaNoIndex => {
         directory => [qw/t xt examples corpus/],
         'package' => [qw/DB/]
@@ -224,8 +244,7 @@ sub configure {
 
   # copy files from build back to root for inclusion in VCS
   [ CopyFilesFromBuild => {
-      copy => [qw/META.json README.PATCHING perlcritic.rc/],
-      move => '.gitignore',
+      copy => 'META.json',
     }
   ],
 
@@ -262,6 +281,10 @@ sub configure {
 
   );
 
+  @plugins = $gen->combine_with( @plugins );
+
+  $self->add_plugins( @plugins );
+
 }
 
 __PACKAGE__->meta->make_immutable;
@@ -289,7 +312,7 @@ Dist::Zilla::PluginBundle::MITHALDU - Dist::Zilla configuration the way MITHALDU
 
 =head1 VERSION
 
-version 1.120050
+version 0.120090
 
 =head1 SYNOPSIS
 
@@ -306,37 +329,20 @@ following dist.ini:
 
    ; version provider
    [AutoVersion]  ; build a version from the date
+   major = 1
  
    ; choose files to include
- 
-   [GenerateFile]
-   filename    = .gitignore
-   is_template = 1
-   content = /.build
-   content = /{{ $dist->name }}-*
-   ; and more, see Dist::Zilla::PluginBundle::MITHALDU::Templates
- 
-   [GenerateFile]
-   filename    = README.PATCHING
-   is_template = 1
-   content = [TestingAndDebugging::RequireUseStrict]
-   content = equivalent_modules = strictures
-   ; and more, see Dist::Zilla::PluginBundle::MITHALDU::Templates
- 
-   [GenerateFile]
-   filename    = perlcritic.rc
-   is_template = 1
-   content = README.PATCHING
-   ; and more, see Dist::Zilla::PluginBundle::MITHALDU::Templates
- 
    [GatherDir]         ; everything under top dir
-   exclude_filename = perlcritic.rc   ; skip this generated file
-   exclude_filename = README.PATCHING ; skip this generated file
    exclude_filename = README.pod   ; skip this generated file
    exclude_filename = META.json    ; skip this generated file
+   exclude_filename = .gitignore   ; skip this generated file
+   exclude_filename = README.PATCHING ; skip this generated file
+   exclude_filename = perlcritic.rc   ; skip this generated file
  
    [PruneCruft]        ; default stuff to skip
    except = .gitignore
+   except = README.PATCHING
+   except = perlcritic.rc
    [ManifestSkip]      ; if -f MANIFEST.SKIP, skip those, too
  
    ; file modifications
@@ -352,6 +358,22 @@ following dist.ini:
    type = pod
    filename = README.pod
    location = root
+   [GenerateFile]
+   filename    = .gitignore
+   is_template = 1
+   content = /.build
+   content = /{{ $dist->name }}-*
+   ; and more, see Dist::Zilla::PluginBundle::MITHALDU::Templates
+   [GenerateFile]
+   filename    = README.PATCHING
+   is_template = 1
+   content = README.PATCHING
+   ; and more, see Dist::Zilla::PluginBundle::MITHALDU::Templates
+   [GenerateFile]
+   filename    = perlcritic.rc
+   is_template = 1
+   content = README.PATCHING
+   ; and more, see Dist::Zilla::PluginBundle::MITHALDU::Templates
  
    ; t tests
    [Test::Compile]     ; make sure .pm files all compile
@@ -435,7 +457,7 @@ following dist.ini:
 =for stopwords autoprereq mithaldu fakerelease pluginbundle podweaver
 taskweaver uploadtocpan dist ini
 
-=for Pod::Coverage configure mvp_multivalue_args
+=for Pod::Coverage configure mvp_multivalue_args old_meta
 
 =head1 USAGE
 
@@ -458,6 +480,10 @@ Default is 1.
 
 C<<< tag_format >>> -- given to C<<< Git::Tag >>>.  Default is 'release-%v' to be more
 robust than just the version number when parsing versions
+
+=item *
+
+C<<< major_version >>> -- overrides the major version set by AutoVersion
 
 =item *
 

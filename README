@@ -3,7 +3,7 @@ NAME
     MITHALDU does it
 
 VERSION
-    version 1.120050
+    version 0.120090
 
 SYNOPSIS
        # in dist.ini
@@ -18,37 +18,20 @@ DESCRIPTION
 
        ; version provider
        [AutoVersion]  ; build a version from the date
+       major = 1
  
        ; choose files to include
- 
-       [GenerateFile]
-       filename    = .gitignore
-       is_template = 1
-       content = /.build
-       content = /{{ $dist->name }}-*
-       ; and more, see Dist::Zilla::PluginBundle::MITHALDU::Templates
- 
-       [GenerateFile]
-       filename    = README.PATCHING
-       is_template = 1
-       content = [TestingAndDebugging::RequireUseStrict]
-       content = equivalent_modules = strictures
-       ; and more, see Dist::Zilla::PluginBundle::MITHALDU::Templates
- 
-       [GenerateFile]
-       filename    = perlcritic.rc
-       is_template = 1
-       content = README.PATCHING
-       ; and more, see Dist::Zilla::PluginBundle::MITHALDU::Templates
- 
        [GatherDir]         ; everything under top dir
-       exclude_filename = perlcritic.rc   ; skip this generated file
-       exclude_filename = README.PATCHING ; skip this generated file
        exclude_filename = README.pod   ; skip this generated file
        exclude_filename = META.json    ; skip this generated file
+       exclude_filename = .gitignore   ; skip this generated file
+       exclude_filename = README.PATCHING ; skip this generated file
+       exclude_filename = perlcritic.rc   ; skip this generated file
  
        [PruneCruft]        ; default stuff to skip
        except = .gitignore
+       except = README.PATCHING
+       except = perlcritic.rc
        [ManifestSkip]      ; if -f MANIFEST.SKIP, skip those, too
  
        ; file modifications
@@ -64,6 +47,22 @@ DESCRIPTION
        type = pod
        filename = README.pod
        location = root
+       [GenerateFile]
+       filename    = .gitignore
+       is_template = 1
+       content = /.build
+       content = /{{ $dist->name }}-*
+       ; and more, see Dist::Zilla::PluginBundle::MITHALDU::Templates
+       [GenerateFile]
+       filename    = README.PATCHING
+       is_template = 1
+       content = README.PATCHING
+       ; and more, see Dist::Zilla::PluginBundle::MITHALDU::Templates
+       [GenerateFile]
+       filename    = perlcritic.rc
+       is_template = 1
+       content = README.PATCHING
+       ; and more, see Dist::Zilla::PluginBundle::MITHALDU::Templates
  
        ; t tests
        [Test::Compile]     ; make sure .pm files all compile
@@ -156,6 +155,8 @@ USAGE
 
     *   "tag_format" -- given to "Git::Tag". Default is 'release-%v' to be
         more robust than just the version number when parsing versions
+
+    *   "major_version" -- overrides the major version set by AutoVersion
 
     *   "fake_release" -- swaps FakeRelease for UploadToCPAN. Mostly useful
         for testing a dist.ini without risking a real release.

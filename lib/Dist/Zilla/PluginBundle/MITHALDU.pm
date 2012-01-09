@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 package Dist::Zilla::PluginBundle::MITHALDU;
-our $VERSION = '0.120090'; # VERSION
+our $VERSION = '1.120091'; # VERSION
 
 # Dependencies
 use autodie 2.00;
@@ -312,7 +312,7 @@ Dist::Zilla::PluginBundle::MITHALDU - Dist::Zilla configuration the way MITHALDU
 
 =head1 VERSION
 
-version 0.120090
+version 1.120091
 
 =head1 SYNOPSIS
 

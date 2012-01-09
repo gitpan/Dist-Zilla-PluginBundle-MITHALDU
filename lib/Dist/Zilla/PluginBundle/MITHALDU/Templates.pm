@@ -1,7 +1,7 @@
 use strictures;
 
 package Dist::Zilla::PluginBundle::MITHALDU::Templates;
-our $VERSION = '0.120090'; # VERSION
+our $VERSION = '1.120091'; # VERSION
 
 # ABSTRACT: some templates for MITHALDU's dzil pluginbundle
 
@@ -36,7 +36,7 @@ Dist::Zilla::PluginBundle::MITHALDU::Templates - some templates for MITHALDU's d
 
 =head1 VERSION
 
-version 0.120090
+version 1.120091
 
 =head1 METHODS
 

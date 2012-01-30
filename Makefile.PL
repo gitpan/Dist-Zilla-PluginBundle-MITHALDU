@@ -28,6 +28,7 @@ my %WriteMakefileArgs = (
     "CPAN::Meta" => 0,
     "Data::Section::Simple" => 0,
     "Dist::Zilla" => "4.3",
+    "Dist::Zilla::App::Command::cover" => 0,
     "Dist::Zilla::Plugin::AutoVersion" => 0,
     "Dist::Zilla::Plugin::Bugtracker" => "1.102670",
     "Dist::Zilla::Plugin::CheckChangesHasContent" => 0,
@@ -43,6 +44,7 @@ my %WriteMakefileArgs = (
     "Dist::Zilla::Plugin::PodWeaver" => 0,
     "Dist::Zilla::Plugin::ReadmeAnyFromPod" => "0.120051",
     "Dist::Zilla::Plugin::ReadmeFromPod" => 0,
+    "Dist::Zilla::Plugin::StaticVersion" => 0,
     "Dist::Zilla::Plugin::TaskWeaver" => "0.101620",
     "Dist::Zilla::Plugin::Test::Compile" => 0,
     "Dist::Zilla::Plugin::Test::Perl::Critic" => 0,
@@ -66,7 +68,7 @@ my %WriteMakefileArgs = (
     "strictures" => 0,
     "warnings" => 0
   },
-  "VERSION" => "1.120091",
+  "VERSION" => "1.120300",
   "test" => {
     "TESTS" => "t/*.t"
   }

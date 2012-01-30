@@ -36,6 +36,7 @@
             "CPAN::Meta" : 0,
             "Data::Section::Simple" : 0,
             "Dist::Zilla" : "4.3",
+            "Dist::Zilla::App::Command::cover" : 0,
             "Dist::Zilla::Plugin::AutoVersion" : 0,
             "Dist::Zilla::Plugin::Bugtracker" : "1.102670",
             "Dist::Zilla::Plugin::CheckChangesHasContent" : 0,
@@ -51,6 +52,7 @@
             "Dist::Zilla::Plugin::PodWeaver" : 0,
             "Dist::Zilla::Plugin::ReadmeAnyFromPod" : "0.120051",
             "Dist::Zilla::Plugin::ReadmeFromPod" : 0,
+            "Dist::Zilla::Plugin::StaticVersion" : 0,
             "Dist::Zilla::Plugin::TaskWeaver" : "0.101620",
             "Dist::Zilla::Plugin::Test::Compile" : 0,
             "Dist::Zilla::Plugin::Test::Perl::Critic" : 0,
@@ -88,15 +90,15 @@
    "provides" : {
       "Dist::Zilla::PluginBundle::MITHALDU" : {
          "file" : "lib/Dist/Zilla/PluginBundle/MITHALDU.pm",
-         "version" : "1.120091"
+         "version" : "1.120300"
       },
       "Dist::Zilla::PluginBundle::MITHALDU::Templates" : {
          "file" : "lib/Dist/Zilla/PluginBundle/MITHALDU/Templates.pm",
-         "version" : "1.120091"
+         "version" : "1.120300"
       },
       "Pod::Weaver::PluginBundle::MITHALDU" : {
          "file" : "lib/Pod/Weaver/PluginBundle/MITHALDU.pm",
-         "version" : "1.120091"
+         "version" : "1.120300"
       }
    },
    "release_status" : "stable",
@@ -112,6 +114,6 @@
          "web" : "https://github.com/wchristian/dist-zilla-pluginbundle-mithaldu"
       }
    },
-   "version" : "1.120091"
+   "version" : "1.120300"
 }
 

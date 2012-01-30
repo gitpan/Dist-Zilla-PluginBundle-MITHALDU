@@ -1,7 +1,9 @@
 Revision history for Dist-Zilla-PluginBundle-MITHALDU
 
-1.120091  2012-01-09 16:12:30 Europe/Berlin
+1.120300  2012-01-30 14:36:47 Europe/Berlin
 
+    - Dist::Zilla::App::cover is now a dependency to ensure it's available on
+      the command line
     - .gitignore, README.PATCHING and perlcritic.rc are now generated during the
       build phase
     - added an option to exclude files by regex

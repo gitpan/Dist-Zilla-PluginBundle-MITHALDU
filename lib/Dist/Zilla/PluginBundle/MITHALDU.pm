@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 package Dist::Zilla::PluginBundle::MITHALDU;
-our $VERSION = '1.120091'; # VERSION
+our $VERSION = '1.120300'; # VERSION
 
 # Dependencies
 use autodie 2.00;
@@ -35,11 +35,15 @@ use Dist::Zilla::Plugin::PodWeaver ();
 use Dist::Zilla::Plugin::Test::Portability ();
 use Dist::Zilla::Plugin::ReadmeAnyFromPod 0.120051 ();
 use Dist::Zilla::Plugin::ReadmeFromPod ();
+use Dist::Zilla::Plugin::StaticVersion ();
 use Dist::Zilla::Plugin::TaskWeaver 0.101620 ();
 use Dist::Zilla::Plugin::Test::Version ();
 
 use Dist::Zilla::PluginBundle::MITHALDU::Templates;
 use Dist::Zilla::Util::FileGenerator;
+
+use Dist::Zilla::App::Command::cover; # this is just here for the prereqs to
+                                      # ensure it's available for dev
 
 with 'Dist::Zilla::Role::PluginBundle::Easy';
 
@@ -312,7 +316,7 @@ Dist::Zilla::PluginBundle::MITHALDU - Dist::Zilla configuration the way MITHALDU
 
 =head1 VERSION
 
-version 1.120091
+version 1.120300
 
 =head1 SYNOPSIS
 
@@ -534,7 +538,7 @@ L<Dist::Zilla::Plugin::TaskWeaver>
 
 =back
 
-=for :stopwords cpan testmatrix url annocpan anno bugtracker rt cpants kwalitee diff irc mailto metadata placeholders
+=for :stopwords cpan testmatrix url annocpan anno bugtracker rt cpants kwalitee diff irc mailto metadata placeholders metacpan
 
 =head1 SUPPORT
 

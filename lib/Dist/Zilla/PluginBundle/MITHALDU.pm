@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 package Dist::Zilla::PluginBundle::MITHALDU;
-our $VERSION = '1.120300'; # VERSION
+our $VERSION = '1.141830'; # VERSION
 
 # Dependencies
 use autodie 2.00;
@@ -145,6 +145,15 @@ has exclude_match => (
   },
 );
 
+has prune_except => (
+  is      => 'ro',
+  isa     => 'ArrayRef',
+  lazy    => 1,
+  default => sub {
+    exists $_[0]->payload->{prune_except} ? $_[0]->payload->{prune_except} : []
+  },
+);
+
 sub old_meta {
   my $meta = try {
     CPAN::Meta->load_file("META.json");
@@ -193,8 +202,11 @@ sub configure {
     $version_provider,
 
   # gather and prune
-    [ GatherDir => { exclude_filename => [qw/README.pod META.json/], exclude_match => $self->exclude_match }], # core
-    'PruneCruft',         # core
+    [ GatherDir => {
+      exclude_filename => [qw/README.pod META.json/],
+      (scalar @{$self->exclude_match}) ? (exclude_match => $self->exclude_match) : () }
+    ], # core
+    ['PruneCruft', { except => $self->prune_except }], # core
     'ManifestSkip',       # core
 
   # file munging
@@ -219,7 +231,7 @@ sub configure {
     [ 'Test::Compile' => { fake_home => 1 } ],
 
   # generated xt/ tests
-    [ 'Test::PodSpelling' => { stopwords => $self->stopwords } ],
+    [ 'Test::PodSpelling' => (scalar @{$self->stopwords}) ? ({ stopwords => $self->stopwords }) : () ],
     'Test::Perl::Critic',
     'MetaTests',          # core
     'PodSyntaxTests',     # core
@@ -299,14 +311,17 @@ __PACKAGE__->meta->make_immutable;
 #
 # This file is part of Dist-Zilla-PluginBundle-MITHALDU
 #
-# This software is Copyright (c) 2012 by Christian Walde.
 #
-# This is free software, licensed under:
+# Christian Walde has dedicated the work to the Commons by waiving all of his
+# or her rights to the work worldwide under copyright law and all related or
+# neighboring legal rights he or she had in the work, to the extent allowable by
+# law.
 #
-#   DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE, Version 2, December 2004
+# Works under CC0 do not require attribution. When citing the work, you should
+# not imply endorsement by the author.
 #
 
-
+__END__
 
 =pod
 
@@ -316,7 +331,7 @@ Dist::Zilla::PluginBundle::MITHALDU - Dist::Zilla configuration the way MITHALDU
 
 =head1 VERSION
 
-version 1.120300
+version 1.141830
 
 =head1 SYNOPSIS
 
@@ -518,6 +533,11 @@ C<<< gitignore >>> -- adds entries to be added to .gitignore (can be repeated)
 
 C<<< exclude_match >>> -- regexes to exclude files from the dist (can be repeated)
 
+=item *
+
+C<<< prune_except >>> -- regexes to except files from being pruned as cruft (can
+be repeated)
+
 =back
 
 =head1 SEE ALSO
@@ -573,15 +593,13 @@ Christian Walde <mithaldu@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2012 by Christian Walde.
 
-This is free software, licensed under:
+Christian Walde has dedicated the work to the Commons by waiving all of his
+or her rights to the work worldwide under copyright law and all related or
+neighboring legal rights he or she had in the work, to the extent allowable by
+law.
 
-  DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE, Version 2, December 2004
+Works under CC0 do not require attribution. When citing the work, you should
+not imply endorsement by the author.
 
 =cut
-
-
-__END__
-
-

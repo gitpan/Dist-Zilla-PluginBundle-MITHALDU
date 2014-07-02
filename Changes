@@ -1,5 +1,8 @@
 Revision history for Dist-Zilla-PluginBundle-MITHALDU
 
+1.141830  2014-07-02 23:40:35+02:00 Europe/Berlin
+    - updates for dzil 5.019
+
 1.120300  2012-01-30 14:36:47 Europe/Berlin
 
     - Dist::Zilla::App::cover is now a dependency to ensure it's available on
